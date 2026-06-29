@@ -17,5 +17,5 @@ object AppModule {
     @Singleton
     @Provides
     fun provideGalleryRepository(@ApplicationContext context: Context): GalleryRepository =
-        GalleryRepositoryImpl(context.contentResolver)
+        GalleryRepositoryImpl(context)
 }

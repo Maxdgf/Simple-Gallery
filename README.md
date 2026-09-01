@@ -27,6 +27,12 @@ The app uses a **content resolver** to parse media, as well as a **content obser
 ## Android versions🔃
 Android 8.0 and later.
 
+## Project installation⌨️
+1. Clone this repository `git clone https://github.com/Maxdgf/Simple-Gallery.git`
+2. Open project in **Android Studio**
+3. Sync gradle files
+4. Launch app on emulator or physical device
+
 ## Upgrade plans🧾
 * Add video display
 * Add actions for each media(search, share, delete, show info...)

@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
-class GalleryRepositoryImpl @Inject constructor(private val context: Context) : GalleryRepository {
+class GalleryRepositoryImpl @Inject constructor(context: Context) : GalleryRepository {
     private val contentResolver = context.contentResolver
 
     override fun getImages(): List<MediaItem> {

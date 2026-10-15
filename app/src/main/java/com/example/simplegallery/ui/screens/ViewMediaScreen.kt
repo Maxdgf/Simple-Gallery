@@ -1,5 +1,6 @@
 package com.example.simplegallery.ui.screens
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,7 +35,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
-import coil3.request.crossfade
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -41,6 +42,37 @@ import com.example.simplegallery.R
 import com.example.simplegallery.ui.screens.navigation.NavigationRoutes
 import com.example.simplegallery.ui.states.MediaListResult
 import com.example.simplegallery.ui.viewmodels.GalleryState
+
+@Composable
+private fun ImageItem(
+    uri: Uri,
+    selectedBorderColor: Color,
+    onClick: () -> Unit
+) {
+    val context = LocalContext.current
+    val imageRequest = remember(uri) {
+        ImageRequest.Builder(context)
+            .data(uri)
+            .size(50, 50)
+            .build()
+    }
+
+    AsyncImage(
+        model = imageRequest,
+        contentDescription = null,
+        modifier = Modifier
+            .width(30.dp)
+            .height(40.dp)
+            .clickable(onClick = onClick)
+            .clip(RoundedCornerShape(2.dp))
+            .border(
+                width = 2.dp,
+                color = selectedBorderColor,
+                shape = RoundedCornerShape(1.dp)
+            ),
+        contentScale = ContentScale.Crop
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -120,29 +152,10 @@ fun ViewMediaAppScreen(
                             items = state.media.values.flatten(),
                             key = { media -> media.id }
                         ) { media ->
-                            val context = LocalContext.current
-
-                            AsyncImage(
-                                model = ImageRequest.Builder(context)
-                                    .data(media.uri)
-                                    .crossfade(true)
-                                    .build(),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .width(30.dp)
-                                    .height(40.dp)
-                                    .clickable(
-                                        onClick = {
-                                            galleryState.updateMediaId(media.id)
-                                        }
-                                    )
-                                    .clip(RoundedCornerShape(2.dp))
-                                    .border(
-                                        width = 2.dp,
-                                        color = if (currentMediaId == media.id) Color.Green else Color.Unspecified,
-                                        shape = RoundedCornerShape(1.dp)
-                                    ),
-                                contentScale = ContentScale.Crop
+                            ImageItem(
+                                uri = media.uri,
+                                selectedBorderColor = if (currentMediaId == media.id) Color.Green else Color.Unspecified,
+                                onClick = { galleryState.updateMediaId(media.id) }
                             )
                         }
                     }

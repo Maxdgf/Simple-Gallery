@@ -1,5 +1,6 @@
 package com.example.simplegallery.ui.screens
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -30,6 +31,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
-import coil3.request.crossfade
 
 import com.example.simplegallery.R
 import com.example.simplegallery.ui.components.LoadingUiBlock
@@ -51,6 +52,37 @@ import com.example.simplegallery.ui.screens.navigation.NavigationRoutes
 import com.example.simplegallery.ui.states.MediaListResult
 import com.example.simplegallery.ui.viewmodels.GalleryState
 
+@Composable
+private fun ImageItem(
+    uri: Uri,
+    onClick: () -> Unit
+) {
+    val context = LocalContext.current
+    val imageRequest = remember(uri) {
+        ImageRequest.Builder(context)
+            .data(uri)
+            .size(250, 250)
+            .build()
+    }
+
+    AsyncImage(
+        model = imageRequest,
+        contentDescription = null,
+        modifier = Modifier
+            .aspectRatio(1f)
+            .border(
+                width = 0.15.dp,
+                color =
+                    if (isSystemInDarkTheme()) Color.White.copy(alpha = 0.5f)
+                    else Color.Black.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(2.dp)
+            )
+            .clip(RoundedCornerShape(2.dp))
+            .clickable(onClick = onClick),
+        contentScale = ContentScale.Crop
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainAppScreen(
@@ -58,8 +90,6 @@ fun MainAppScreen(
     galleryState: GalleryState
 ) {
     val media by galleryState.allMedia.collectAsState()
-
-    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -92,7 +122,7 @@ fun MainAppScreen(
                         horizontalArrangement = Arrangement.spacedBy(5.dp),
                         columns = GridCells.Fixed(5)
                     ) {
-                        mediaState.media.forEach { date, media ->
+                        mediaState.media.forEach { (date, media) ->
                             item(span = { GridItemSpan(5) }) {
                                 Spacer(modifier = Modifier.height(10.dp))
                             }
@@ -127,29 +157,12 @@ fun MainAppScreen(
                                 items = media,
                                 key = { item -> item.id }
                             ) { image ->
-                                AsyncImage(
-                                    model = ImageRequest.Builder(context)
-                                        .data(image.uri)
-                                        .crossfade(true)
-                                        .build(),
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .aspectRatio(1f)
-                                        .border(
-                                            width = 0.15.dp,
-                                            color =
-                                                if (isSystemInDarkTheme()) Color.White.copy(alpha = 0.5f)
-                                                else Color.Black.copy(alpha = 0.5f),
-                                            shape = RoundedCornerShape(2.dp)
-                                        )
-                                        .clip(RoundedCornerShape(2.dp))
-                                        .clickable(
-                                            onClick = {
-                                                onNavigateTo(NavigationRoutes.ViewMediaScreen.route)
-                                                galleryState.updateMediaId(image.id)
-                                            }
-                                        ),
-                                    contentScale = ContentScale.Crop
+                                ImageItem(
+                                    uri = image.uri,
+                                    onClick = {
+                                        onNavigateTo(NavigationRoutes.ViewMediaScreen.route)
+                                        galleryState.updateMediaId(image.id)
+                                    }
                                 )
                             }
                         }
